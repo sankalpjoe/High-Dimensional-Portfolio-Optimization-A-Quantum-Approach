@@ -220,15 +220,3 @@ plt.show()
 ```
 
 
-## Citation
-
-If you use this code in your research, please cite:
-
-```
-@software{quantum_portfolio,
-  author = {Quantum Portfolio Team},
-  title = {Quantum Portfolio Optimization},
-  year = {2023},
-  url = {https://github.com/quantum-portfolio/quantum-portfolio-optimizer}
-}
-```
