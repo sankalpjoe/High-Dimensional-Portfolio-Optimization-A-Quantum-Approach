@@ -1,0 +1,53 @@
+# Quantum Portfolio Optimization
+
+A machine learning framework for portfolio optimization using quantum computing techniques.
+
+## Project Structure
+
+```
+quantum_portfolio/
+│
+├── config/
+│   └── default.yaml             # Configuration parameters
+│
+├── data/
+│   ├── __init__.py
+│   ├── dataset.py               # Dataset handling and preprocessing
+│   └── financial_data.py        # Financial data fetching and transformation
+│
+├── models/
+│   ├── __init__.py
+│   ├── quantum_model.py         # Quantum portfolio optimization model
+│   ├── classical_model.py       # Classical portfolio optimization model
+│   └── clustering.py            # Asset clustering methods
+│
+├── training/
+│   ├── __init__.py
+│   ├── trainer.py               # Training logic for hyperparameter optimization
+│   └── cross_validation.py      # Time series cross-validation
+│
+├── evaluation/
+│   ├── __init__.py
+│   ├── metrics.py               # Financial metrics calculation
+│   └── visualization.py         # Plotting and visualization
+│
+├── utils/
+│   ├── __init__.py
+│   └── helpers.py               # Utility functions
+│
+├── __init__.py
+├── main.py                      # Main execution script
+├── setup.py                     # Package setup script
+└── README.md                    # Project documentation
+```
+
+## Enhancements Over Original Code
+
+1. **Modular Architecture**: Separate components for data, models, training, and evaluation
+2. **Trainable Model**: Hyperparameter optimization and time series cross-validation
+3. **Advanced Features**:
+   - Multiple quantum circuit ansatzes
+   - Risk measures beyond volatility (CVaR, drawdown)
+   - Feature engineering for better returns prediction
+   - Different optimization objectives
+4. **Improved Development**: Logging, configuration, type hints, and documentation

@@ -1,0 +1,114 @@
+# Quantum Portfolio Optimization Configuration
+
+# Data parameters
+data:
+  default_tickers:
+    - AAPL
+    - MSFT
+    - AMZN
+    - GOOGL
+    - META
+    - TSLA
+    - BRK-B
+    - JPM
+    - V
+    - PG
+    - UNH
+    - HD
+    - BAC
+    - XOM
+    - NVDA
+    - DIS
+    - PYPL
+    - NFLX
+    - INTC
+    - VZ
+    - ADBE
+    - CMCSA
+    - PFE
+    - KO
+    - CRM
+    - CSCO
+    - ABT
+    - PEP
+    - WMT
+    - MRK
+  default_start_date: "2020-01-01"
+  default_end_date: "2023-01-01"
+  returns_type: "log"  # Options: log, simple
+  frequency: "daily"   # Options: daily, weekly, monthly
+
+# Clustering parameters
+clustering:
+  method: "hierarchical"  # Options: hierarchical, kmeans, dbscan
+  n_clusters_range: [3, 10]  # Range to test for optimal number of clusters
+  distance_metric: "correlation"  # Options: correlation, euclidean
+  linkage_method: "ward"  # Options: ward, complete, average, single
+
+# Quantum model parameters
+quantum:
+  backend_type: "simulator"  # Options: simulator, real
+  simulator: "statevector_simulator"
+  ansatz_type: "efficient_su2"  # Options: efficient_su2, two_local, custom
+  repetitions_range: [1, 5]  # Range of repetitions for circuits
+  optimization_level: 1  # Transpiler optimization level (0-3)
+  shots: 1024  # Number of shots for circuit execution
+  resilience_level: 1  # Error mitigation level
+  
+# Classical model parameters
+classical:
+  methods:
+    - "equal_weight"
+    - "min_variance"
+    - "max_sharpe"
+    - "risk_parity"
+  solver: "SLSQP"  # Options: SLSQP, COBYLA
+  max_iterations: 1000
+
+# Optimization parameters
+optimization:
+  risk_aversion_range: [0.5, 5.0]  # Range for risk aversion parameter
+  risk_measures:
+    - "variance"
+    - "cvar"
+    - "drawdown"
+  constraints:
+    max_weight: 0.3  # Maximum weight for a single asset
+    min_weight: 0.0  # Minimum weight for a single asset (0 = allow exclusion)
+    sector_constraints: False  # Whether to add sector-based constraints
+
+# Training parameters
+training:
+  cv_method: "expanding_window"  # Options: expanding_window, sliding_window
+  n_splits: 5
+  test_size: 60  # Number of days for test period
+  hyperopt_method: "bayesian"  # Options: bayesian, random, grid
+  hyperopt_iterations: 50
+  scoring_metric: "sharpe_ratio"  # Options: sharpe_ratio, sortino_ratio, calmar_ratio
+  random_state: 42
+
+# Evaluation parameters
+evaluation:
+  metrics:
+    - "sharpe_ratio"
+    - "sortino_ratio"
+    - "max_drawdown"
+    - "alpha"
+    - "beta"
+    - "information_ratio"
+  benchmark: "SPY"  # Ticker for benchmark
+  n_random_portfolios: 10000  # For efficient frontier
+
+# Visualization parameters
+visualization:
+  plot_efficient_frontier: True
+  plot_cluster_map: True
+  plot_performance: True
+  plot_weights: True
+  save_plots: True
+  plots_dir: "plots"
+  
+# Logging
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  log_file: "quantum_portfolio.log"
