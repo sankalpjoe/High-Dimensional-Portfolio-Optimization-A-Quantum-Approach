@@ -97,41 +97,7 @@ optimizer.plot_efficient_frontier(
 ![Model Architecture](diagram.svg)
 Our quantum portfolio optimization framework employs a hybrid quantum-classical architecture that scales effectively for high-dimensional portfolio problems.
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           High-Level Architecture                           │
-└────────────────────────────────────────────────────────────────────────────┘
-                                       │
-                                       ▼
-┌────────────────────┐      ┌─────────────────────┐      ┌───────────────────┐
-│   Data Collection  │──────▶ Classical Preprocessing ───▶  Quantum Optimizer │
-└────────────────────┘      └─────────────────────┘      └───────────────────┘
-         │                            │                            │
-         ▼                            ▼                            ▼
-  ┌────────────┐            ┌─────────────────┐          ┌──────────────────┐
-  │  Market    │            │ Dimensionality  │          │ QAOA Optimization│
-  │  Data API  │            │ Reduction       │          │ (QUBO Solver)    │
-  └────────────┘            └─────────────────┘          └──────────────────┘
-                                     │                             │
-                                     ▼                             │
-                            ┌────────────────────┐                 │
-                            │ Hierarchical       │                 │
-                            │ Risk Parity (HRP)  │                 │
-                            └────────────────────┘                 │
-                                     │                             │
-                                     ▼                             ▼
-                            ┌────────────────────┐        ┌─────────────────┐
-                            │ Covariance Matrix  │        │ Results Analysis│
-                            │ Estimation         │        │ & Visualization │
-                            └────────────────────┘        └─────────────────┘
-                                     │                             │
-                                     └─────────────────────────────┘
-                                                   │
-                                                   ▼
-                                       ┌────────────────────────┐
-                                       │ Final Portfolio Weights│
-                                       └────────────────────────┘
-```
+
 
 ## Component Breakdown
 
