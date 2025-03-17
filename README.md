@@ -2,7 +2,6 @@
 
 A high-dimensional portfolio optimization framework that leverages quantum computing techniques to outperform classical approaches for large investment universes.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Key Performance Metrics
 
@@ -95,7 +94,7 @@ optimizer.plot_efficient_frontier(
 # Quantum Portfolio Optimizer: Architecture & Approach
 
 ## System Architecture
-
+![Model Architecture](diagram.svg)
 Our quantum portfolio optimization framework employs a hybrid quantum-classical architecture that scales effectively for high-dimensional portfolio problems.
 
 ```
