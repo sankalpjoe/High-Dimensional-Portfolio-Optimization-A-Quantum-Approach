@@ -1,222 +1,233 @@
-# High-Dimensional-Portfolio-Optimization-A-Quantum-Approach
+# High-Dimensional Portfolio Optimization: A Quantum Approach
 
-A machine learning framework for portfolio optimization using quantum computing techniques.
+### Cluster assets, compare optimizers, and evaluate portfolios across time
 
-## Overview
+This Python framework studies portfolio optimization when the asset universe
+is large. It groups similar assets with hierarchical clustering, builds a
+lower-dimensional optimization problem, and compares a quantum approach with
+a classical baseline under the same evaluation workflow.
 
-This package implements a portfolio optimization system that leverages quantum computing and machine learning to optimize investment portfolios. By combining hierarchical clustering for dimensionality reduction with quantum optimization algorithms, this approach efficiently handles high-dimensional portfolios with many assets.
+**Research status:** The repository description does not provide benchmark
+results or evidence of a quantum advantage. Treat its outputs as experimental
+analysis, not investment recommendations.
 
-Key features:
+[Workflow](#workflow) · [Quick start](#quick-start) ·
+[Command line](#command-line) · [Configuration](#configuration) ·
+[Evaluation](#evaluation-and-validation)
 
-- **Quantum-enhanced optimization**: Utilizes quantum computing techniques to potentially find better solutions than classical methods
-- **Hierarchical clustering**: Reduces dimensionality by grouping similar assets
-- **Cross-validation and hyperparameter tuning**: Finds optimal parameters through time series cross-validation
-- **Multiple risk measures**: Supports variance, Conditional Value at Risk (CVaR), and drawdown-based optimization
-- **Comprehensive evaluation**: Provides detailed performance metrics and visualizations
+---
 
-## Installation
+## At a glance
 
-### Prerequisites
+| Stage | Purpose |
+| --- | --- |
+| Financial data | Fetch prices and calculate asset returns |
+| Asset clustering | Group similar assets to reduce the optimization dimension |
+| Portfolio models | Run quantum and classical optimization paths |
+| Training | Tune model settings with time-series splits |
+| Evaluation | Compare portfolio metrics with a benchmark and visualize results |
 
-- Python 3.8 or higher
-- Qiskit and other dependencies (installed automatically)
+Supported risk objectives described in the project include **variance**,
+**Conditional Value at Risk (CVaR)**, and **drawdown-based** formulations.
+Available constraints and solver behavior depend on the chosen configuration.
 
-### Install from source
+## Workflow
 
-```bash
-git clone https://github.com/quantum-portfolio/quantum-portfolio-optimizer.git
-cd quantum-portfolio-optimizer
-pip install -e .
+```mermaid
+flowchart LR
+    A["Price data"] --> B["Returns and features"]
+    B --> C["Hierarchical asset clustering"]
+    C --> D["Cluster returns and covariance"]
+    D --> E["Quantum optimizer"]
+    D --> F["Classical baseline"]
+    E --> G["Portfolio weights"]
+    F --> G
+    G --> H["Held-out evaluation"]
+    H --> I["Metrics and visualizations"]
 ```
 
-## Quick Start
+Clustering makes the search problem smaller by summarizing related assets.
+The two optimizers can then be assessed against the same return history and
+benchmark. A fair comparison should hold data windows, constraints, risk
+objective, and evaluation metrics constant.
+
+## Quick start
+
+### Install
+
+Use Python 3.8 or newer. From a checkout of this project:
+
+```bash
+python -m pip install -e .
+```
+
+The project uses Qiskit and other dependencies declared by its package
+configuration. A compatible quantum backend is selected through the YAML
+configuration.
+
+### Run an optimization
+
+```bash
+quantum-portfolio --mode optimize
+```
+
+### Use the Python API
 
 ```python
+import yaml
+
 from quantum_portfolio.data.dataset import FinancialDataset
 from quantum_portfolio.models.clustering import AssetClustering
 from quantum_portfolio.models.quantum_model import QuantumPortfolioModel
-import yaml
 
-# Load configuration
-with open('config/default.yaml', 'r') as file:
+config_path = "config/default.yaml"
+with open(config_path, "r", encoding="utf-8") as file:
     config = yaml.safe_load(file)
 
-# Initialize components
-dataset = FinancialDataset(config_path='config/default.yaml')
+dataset = FinancialDataset(config_path=config_path)
 clustering = AssetClustering(config)
-quantum_model = QuantumPortfolioModel(config)
+model = QuantumPortfolioModel(config)
 
-# Fetch data
-prices = dataset.fetch_data()
+dataset.fetch_data()
 returns = dataset.calculate_returns()
-
-# Perform clustering
-n_clusters = 5
-clusters = clustering.cluster_assets(returns, n_clusters=n_clusters)
-
-# Calculate cluster returns and statistics
+clusters = clustering.cluster_assets(returns, n_clusters=5)
 cluster_returns = clustering.calculate_cluster_returns(returns)
-cluster_means = cluster_returns.mean()
-cluster_cov = cluster_returns.cov()
 
-# Run quantum optimization
-quantum_result = quantum_model.optimize(cluster_means, cluster_cov, clusters)
+result = model.optimize(
+    cluster_returns.mean(),
+    cluster_returns.cov(),
+    clusters,
+)
 
-# Get benchmark returns
 benchmark_returns = dataset.get_benchmark_returns()
+metrics = model.evaluate_portfolio(returns, benchmark_returns)
 
-# Evaluate portfolio
-metrics = quantum_model.evaluate_portfolio(returns, benchmark_returns)
-
-# Print results
-print("Portfolio Weights:")
-for asset, weight in sorted(quantum_model.portfolio_weights.items()):
-    print(f"  {asset}: {weight:.4f}")
-
-print("\nPerformance Metrics:")
-for metric, value in metrics.items():
-    print(f"  {metric}: {value:.4f}")
+print("Portfolio weights:", model.portfolio_weights)
+print("Evaluation metrics:", metrics)
 ```
 
-## Command Line Usage
+The exact data source, tickers, dates, backend, and risk settings come from
+`config/default.yaml`. The example follows the API shown in the project draft;
+check the installed package for any version-specific changes.
 
-The package provides a command-line interface for running optimizations:
+## Command line
 
-```bash
-# Run optimization with default parameters
-quantum-portfolio --mode optimize
+| Task | Command |
+| --- | --- |
+| Optimize with defaults | `quantum-portfolio --mode optimize` |
+| Tune parameters and plot | `quantum-portfolio --mode train --plot` |
+| Evaluate saved parameters | `quantum-portfolio --mode evaluate --load_params params.yaml --plot` |
+| Compare optimizer paths | `quantum-portfolio --mode optimize --compare --plot` |
+| Use another configuration | `quantum-portfolio --config my_config.yaml` |
 
-# Train a model to find optimal hyperparameters
-quantum-portfolio --mode train --plot
-
-# Evaluate a portfolio with specific parameters
-quantum-portfolio --mode evaluate --load_params params.yaml --plot
-
-# Compare quantum and classical optimization
-quantum-portfolio --mode optimize --compare --plot
-```
+Run `quantum-portfolio --help` for the options supported by your installed
+version.
 
 ## Configuration
 
-The system is configured through a YAML file. The default configuration is in `config/default.yaml`. You can provide a custom configuration file with the `--config` parameter:
+The default settings live in `config/default.yaml`. Configuration covers:
 
-```bash
-quantum-portfolio --config my_config.yaml
-```
+| Area | Examples |
+| --- | --- |
+| Data | Tickers, date range, sampling frequency |
+| Clustering | Method and number of clusters |
+| Quantum model | Backend and ansatz |
+| Optimization | Risk measure and portfolio constraints |
+| Training | Cross-validation and hyperparameter search |
+| Outputs | Plots and other visualizations |
 
-Configuration parameters include:
+Record the configuration used for each experiment so results can be compared
+and reproduced.
 
-- Data settings (tickers, dates, frequency)
-- Clustering parameters (method, number of clusters)
-- Quantum model settings (backend, ansatz type)
-- Optimization parameters (risk measures, constraints)
-- Training settings (cross-validation, hyperparameter optimization)
-- Visualization settings
+## Evaluation and validation
 
-## Key Components
-
-1. **Data Module**: Handles financial data acquisition, preprocessing, and feature engineering.
-2. **Clustering Module**: Implements dimensionality reduction through asset clustering.
-3. **Quantum Model**: Portfolio optimization using quantum algorithms.
-4. **Classical Model**: Traditional portfolio optimization methods for comparison.
-5. **Training Module**: Hyperparameter optimization and time series cross-validation.
-6. **Evaluation Module**: Performance metrics calculation and visualization.
-
-## System Architecture
+Time-series validation respects the order of observations. Training windows
+come before their corresponding test windows; model tuning belongs within the
+training portion of each split.
 
 ```mermaid
-flowchart TD
-    A[Financial Data] --> B[Data Preprocessing]
-    B --> C[Feature Engineering]
-    C --> D[Asset Clustering]
-    
-    D --> E[Dimensionality Reduction]
-    E --> F1[Classical Optimization] & F2[Quantum Optimization]
-    
-    F1 --> G[Portfolio Weights]
-    F2 --> G
-    
-    G --> H[Performance Evaluation]
-    H --> I[Visualization]
-    
-    J[Hyperparameter Tuning] --> |Optimize Parameters| D
-    J --> |Optimize Parameters| F1 & F2
-    H --> |Feedback| J
-    
-    subgraph Training Loop
-        J
-    end
+flowchart TB
+    T1["Past observations: train"] --> V1["Next observations: test"]
+    T2["Expanded or shifted train window"] --> V2["Later test window"]
+    V1 --> R["Aggregate out-of-sample results"]
+    V2 --> R
+    R --> C["Compare quantum and classical paths"]
 ```
-
-The diagram shows the complete workflow from data ingestion to final visualization, including the training loop for hyperparameter optimization.
-
-## Advanced Features
-
-### Time Series Cross-Validation
-
-The system implements proper time series cross-validation to avoid look-ahead bias:
 
 ```python
 from quantum_portfolio.data.dataset import FinancialDataset
 
 dataset = FinancialDataset()
-prices = dataset.fetch_data()
+dataset.fetch_data()
 returns = dataset.calculate_returns()
 
-# Create time series splits
 splits = dataset.create_time_series_splits(
     data=returns,
-    method='expanding_window',  # or 'sliding_window'
+    method="expanding_window",  # or "sliding_window"
     n_splits=5,
-    test_size=60  # 60 days for test period
+    test_size=60,
 )
 
-# Use splits for training and testing
-for i, (train, test) in enumerate(splits):
-    print(f"Split {i+1}: train={train.shape}, test={test.shape}")
+for index, (train, test) in enumerate(splits, start=1):
+    print(f"Split {index}: train={train.shape}, test={test.shape}")
 ```
 
-### Hyperparameter Tuning
-
-Find optimal parameters through Bayesian optimization:
+The package also describes Bayesian hyperparameter tuning through
+`PortfolioTrainer`:
 
 ```python
 from quantum_portfolio.training.trainer import PortfolioTrainer
 
-trainer = PortfolioTrainer(config, dataset, clustering, quantum_model)
-results = trainer.train()
-
-# Get best parameters
+trainer = PortfolioTrainer(config, dataset, clustering, model)
+trainer.train()
 print("Best parameters:", trainer.best_params)
-
-# Train final model with best parameters
 final_results = trainer.final_model()
 ```
 
-### Visualization
+For any reported comparison, include the test dates, asset universe, data
+cleaning rules, optimizer settings, baseline tuning, transaction-cost
+assumptions, and quantum backend. This README does not include performance
+numbers because none were supplied in the project draft.
 
-Generate comprehensive visualizations:
+## Visualizing results
+
+The project exposes a visualization helper for portfolio weights, performance
+metrics, and returns over time:
 
 ```python
+import matplotlib.pyplot as plt
 from quantum_portfolio.evaluation.visualization import PortfolioVisualizer
 
 visualizer = PortfolioVisualizer(config)
+visualizer.plot_portfolio_weights(final_results["portfolio_weights"])
+visualizer.plot_performance_metrics(final_results["metrics"])
 
-# Plot portfolio weights
-fig_weights = visualizer.plot_portfolio_weights(final_results['portfolio_weights'])
-
-# Plot performance metrics
-fig_metrics = visualizer.plot_performance_metrics(final_results['metrics'])
-
-# Plot performance over time
-portfolio_returns = returns.dot([final_results['portfolio_weights'].get(asset, 0) 
-                                for asset in returns.columns])
-fig_performance = visualizer.plot_performance_over_time(
-    portfolio_returns,
-    benchmark_returns
-)
-
+weights = [final_results["portfolio_weights"].get(asset, 0)
+           for asset in returns.columns]
+portfolio_returns = returns.dot(weights)
+visualizer.plot_performance_over_time(portfolio_returns, benchmark_returns)
 plt.show()
 ```
 
+## Project modules
 
+| Module | Responsibility |
+| --- | --- |
+| `quantum_portfolio.data` | Data acquisition and return preparation |
+| `quantum_portfolio.models.clustering` | Asset grouping and cluster statistics |
+| `quantum_portfolio.models.quantum_model` | Quantum portfolio optimization |
+| Classical model | Baseline optimization for comparison |
+| `quantum_portfolio.training` | Parameter search and validation |
+| `quantum_portfolio.evaluation` | Metrics and plots |
+
+## Research questions
+
+- How much does clustering reduce problem size, and what information is lost?
+- Does the quantum approach improve an out-of-sample objective under the same
+  constraints and computational budget as the classical baseline?
+- How sensitive are results to the backend, ansatz, risk measure, and market
+  period?
+- Do any gains remain after realistic execution assumptions are included?
+
+The answers require measured, reproducible experiments; the presence of a
+quantum optimizer alone does not answer them.
